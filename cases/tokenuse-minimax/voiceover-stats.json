@@ -1,0 +1,62 @@
+{
+  "model": "speech-2.8-hd",
+  "voice_id": "Chinese (Mandarin)_Gentleman",
+  "speed": 1.05,
+  "sample_rate": 32000,
+  "scenes": 6,
+  "totalChars": 212,
+  "totalAudioSeconds": 38.151,
+  "timelineDurationSeconds": 44.033333,
+  "totalFrames": 2642,
+  "wallClockSeconds": 2.246,
+  "perScene": [
+    {
+      "index": 0,
+      "id": "pain",
+      "chars": 29,
+      "audioSeconds": 5.3,
+      "apiSeconds": 1.812,
+      "subtitleSegments": 1
+    },
+    {
+      "index": 1,
+      "id": "hero",
+      "chars": 37,
+      "audioSeconds": 6.095,
+      "apiSeconds": 1.968,
+      "subtitleSegments": 1
+    },
+    {
+      "index": 2,
+      "id": "five",
+      "chars": 54,
+      "audioSeconds": 8.4,
+      "apiSeconds": 2.044,
+      "subtitleSegments": 1
+    },
+    {
+      "index": 3,
+      "id": "switch",
+      "chars": 30,
+      "audioSeconds": 6.583,
+      "apiSeconds": 1.761,
+      "subtitleSegments": 1
+    },
+    {
+      "index": 4,
+      "id": "local",
+      "chars": 39,
+      "audioSeconds": 7.918,
+      "apiSeconds": 1.939,
+      "subtitleSegments": 1
+    },
+    {
+      "index": 5,
+      "id": "outro",
+      "chars": 23,
+      "audioSeconds": 3.855,
+      "apiSeconds": 1.703,
+      "subtitleSegments": 1
+    }
+  ]
+}

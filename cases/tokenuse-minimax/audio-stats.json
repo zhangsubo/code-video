@@ -1,0 +1,16 @@
+{
+  "sampleRate": 48000,
+  "channels": 2,
+  "durationSeconds": 44.031,
+  "duckingDepthDb": 7.5,
+  "attackMs": 25,
+  "releaseMs": 280,
+  "foleyEvents": 9,
+  "integratedLufs": -14.6,
+  "truePeakDbfs": -2.5,
+  "loudnormTarget": {
+    "I": -14.0,
+    "TP": -2.5,
+    "LRA": 11.0
+  }
+}

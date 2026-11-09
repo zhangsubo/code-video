@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TokenUse — 24s Product Film</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --paper: #f2efe8;
+    --ink: #171816;
+    --muted: #716f68;
+    --blue: #5265ed;
+    --mint: #56dca0;
+    --dark: #090c12;
+    --line-dark: rgba(255,255,255,.13);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-width: 1920px; min-height: 1080px; background: #111; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif; }
+  button, input { font: inherit; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--paper); isolation: isolate; }
+  .scene { position: absolute; inset: 0; overflow: hidden; display: none; }
+  .scene.light { color: var(--ink); background: var(--paper); }
+  .scene.light::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 86% 10%, rgba(82,101,237,.09), transparent 33%), repeating-linear-gradient(0deg, rgba(20,20,15,.018) 0, rgba(20,20,15,.018) 1px, transparent 1px, transparent 4px); pointer-events: none; }
+  .scene.dark { color: #f7f8fb; background: var(--dark); }
+  .desktop { background: radial-gradient(ellipse at 16% 10%, rgba(105,121,255,.32), transparent 44%), radial-gradient(ellipse at 88% 78%, rgba(64,193,180,.20), transparent 38%), linear-gradient(135deg, #171b2a 0%, #090d15 52%, #12151d 100%); }
+  .topline { position: absolute; left: 100px; right: 100px; top: 66px; display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 650; letter-spacing: .15em; text-transform: uppercase; z-index: 3; }
+  .light .topline { color: #65645f; }
+  .dark .topline { color: rgba(255,255,255,.53); }
+  .topline .chapter { display: flex; align-items: center; gap: 16px; white-space: nowrap; }
+  .chapter b { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 28px; border: 1px solid currentColor; border-radius: 20px; font-size: 14px; letter-spacing: 0; }
+  .display { margin: 0; font-weight: 780; letter-spacing: -.055em; line-height: .96; white-space: nowrap; }
+  .display .accent { color: var(--blue); }
+  .dark .display .accent { color: #8d9aff; }
+  .num, [data-num] { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; white-space: nowrap; }
+  .micro { font-size: 16px; line-height: 1.45; letter-spacing: .03em; }
+  .icon { display: block; object-fit: contain; }
+  .footer-rule { position: absolute; left: 100px; right: 100px; bottom: 58px; height: 1px; background: currentColor; opacity: .16; }
+  .foot-note { position: absolute; left: 100px; bottom: 78px; font-size: 17px; letter-spacing: .08em; opacity: .58; }
+  .giant-index { position: absolute; right: 88px; bottom: 15px; font-size: 190px; font-weight: 800; line-height: 1; letter-spacing: -.08em; opacity: .055; }
+  .s0-title { position: absolute; left: 100px; top: 250px; font-size: 164px; }
+  .s0-title span { display: block; }
+  .s0-sub { position: absolute; left: 108px; top: 650px; display: flex; gap: 14px; }
+  .s0-sub .pill { padding: 13px 22px; border: 1px solid rgba(23,24,22,.22); font-size: 22px; font-weight: 600; }
+  .s0-app { position: absolute; right: 154px; top: 236px; width: 340px; height: 340px; border-radius: 78px; box-shadow: 0 34px 70px rgba(42,48,84,.22); }
+  .s0-side { position: absolute; right: 160px; top: 630px; width: 330px; font-size: 25px; line-height: 1.35; font-weight: 560; }
+  .s0-side strong { display: block; font-size: 58px; letter-spacing: -.04em; margin-bottom: 8px; }
+  .wallpaper-orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .35; }
+  .orb-a { width: 660px; height: 660px; left: 200px; top: 100px; background: #586de0; }
+  .orb-b { width: 520px; height: 520px; right: 100px; bottom: -120px; background: #2d8f88; }
+  .s1-title { position: absolute; left: 100px; top: 126px; font-size: 108px; }
+  .s1-sub { position: absolute; left: 106px; top: 254px; color: rgba(255,255,255,.62); font-size: 25px; }
+  .hero-hud { position: absolute; left: 105px; top: 326px; width: 644px; height: 670px; transform: scale(.91); transform-origin: top left; }
+  .s1-dock { position: absolute; left: 1810px; top: 332px; transform: scale(2.05); transform-origin: top left; }
+  .s1-copy { position: absolute; left: 1390px; top: 335px; width: 400px; }
+  .s1-copy h2 { font-size: 80px; }
+  .s1-copy p { color: rgba(255,255,255,.6); font-size: 23px; line-height: 1.55; }
+  .live-pill { padding: 9px 15px; color: #77eab5; background: rgba(64,203,143,.12); border: 1px solid rgba(100,229,172,.3); font-size: 17px; font-weight: 650; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #62e4aa; }
+  .s1-mascot { position: absolute; width: 190px; height: 190px; right: 144px; bottom: 78px; }
+  .hud-window { position: relative; width: 644px; height: 670px; overflow: hidden; border-radius: 28px; color: #fff; background: linear-gradient(135deg, rgba(72,84,119,.72), rgba(24,31,47,.86)); border: 1px solid rgba(255,255,255,.24); box-shadow: inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 7px rgba(255,255,255,.018), 0 28px 70px rgba(0,0,0,.38); backdrop-filter: blur(30px) saturate(135%); }
+  .hud-inner { padding: 18px 22px 14px; }
+  .hud-header { height: 48px; display: flex; align-items: center; gap: 11px; }
+  .hud-bolt { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(145deg, #78a4ff, #3a6ee7); box-shadow: 0 5px 12px rgba(0,0,0,.22); font-size: 20px; }
+  .hud-brand { font-size: 20px; font-weight: 650; line-height: 1.1; }
+  .hud-subtitle { color: rgba(255,255,255,.58); font-size: 11px; margin-top: 5px; }
+  .hud-actions { margin-left: auto; display: flex; gap: 6px; }
+  .hud-action { width: 29px; height: 29px; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.13); color: rgba(255,255,255,.72); font-size: 13px; }
+  .hud-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.17), transparent); margin: 12px 0 10px; }
+  .hud-summary { display: grid; grid-template-columns: 1fr 1fr 68px; gap: 10px; }
+  .metric { min-width: 0; height: 68px; padding: 10px 13px; border-radius: 15px; background: linear-gradient(135deg, rgba(255,255,255,.11), rgba(255,255,255,.045)); border: 1px solid rgba(255,255,255,.13); }
+  .metric-title { color: rgba(255,255,255,.62); font-size: 11px; white-space: nowrap; }
+  .metric-value { margin-top: 8px; font-size: 19px; font-weight: 720; white-space: nowrap; }
+  .metric-value small { font-size: 10px; color: rgba(255,255,255,.43); font-weight: 500; }
+  .hud-mascot { width: 68px; height: 68px; border-radius: 15px; object-fit: cover; background: rgba(255,255,255,.07); }
+  .filters { display: flex; gap: 5px; margin: 10px 0; }
+  .filter { height: 29px; display: flex; align-items: center; gap: 5px; padding: 0 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.05); color: rgba(255,255,255,.72); font-size: 10px; white-space: nowrap; }
+  .filter.selected { background: rgba(255,255,255,.15); color: #fff; }
+  .filter img { width: 13px; height: 13px; border-radius: 3px; }
+  .provider-card { padding: 11px; border-radius: 16px; background: rgba(255,255,255,.065); border: 1px solid rgba(255,255,255,.12); margin-bottom: 9px; }
+  .provider-head { display: flex; align-items: center; gap: 8px; }
+  .provider-logo { width: 28px; height: 28px; padding: 5px; border-radius: 9px; background: rgba(255,255,255,.08); }
+  .provider-name { font-size: 13px; font-weight: 650; white-space: nowrap; }
+  .vendor { padding: 2px 6px; border-radius: 99px; background: rgba(255,255,255,.07); font-size: 9px; color: rgba(255,255,255,.48); }
+  .running { margin-left: auto; padding: 3px 7px; color: #70e9b0; background: rgba(58,199,137,.13); font-size: 9px; font-weight: 650; }
+  .today-mini { margin-left: auto; font-size: 10px; color: rgba(255,255,255,.65); }
+  .account { margin-top: 9px; padding: 9px 10px; border-radius: 11px; background: rgba(0,0,0,.18); border: 1px solid rgba(255,255,255,.07); }
+  .account-line { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #58d99a; }
+  .account-name { font-size: 11px; font-weight: 600; }
+  .account-badge { padding: 2px 6px; border-radius: 99px; color: #71e4ac; background: rgba(72,202,142,.13); font-size: 9px; }
+  .account-tokens { margin-left: auto; color: rgba(255,255,255,.58); font-size: 10px; }
+  .battery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 9px; }
+  .battery-label { display: flex; justify-content: space-between; color: rgba(255,255,255,.75); font-size: 9px; }
+  .battery-label b { color: #80eab5; font-weight: 650; }
+  .battery-track { height: 6px; margin-top: 5px; border-radius: 99px; background: rgba(255,255,255,.09); overflow: hidden; }
+  .battery-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #598cff, #58daa3); }
+  .cloud-strip { display: flex; align-items: center; gap: 6px; margin-top: 9px; padding: 6px 8px; border-radius: 7px; color: rgba(255,255,255,.62); background: rgba(87,140,255,.07); border: 1px solid rgba(87,140,255,.13); font-size: 9px; white-space: nowrap; }
+  .cloud-strip b { color: #a9c5ff; font-weight: 600; }
+  .cloud-strip span:last-child { margin-left: auto; color: #8faff8; }
+  .hud-footer { display: flex; justify-content: space-between; padding: 6px 10px; border-radius: 9px; color: rgba(255,255,255,.4); background: rgba(255,255,255,.035); font-size: 9px; }
+  .edge-dock { width: 50px; height: 250px; padding: 8px 4px; border-radius: 21px; background: linear-gradient(145deg, rgba(67,84,126,.9), rgba(22,30,50,.94)); border: 1px solid rgba(255,255,255,.26); box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 8px 24px rgba(0,0,0,.30); backdrop-filter: blur(20px); color: #fff; }
+  .dock-grip { width: 14px; height: 2px; border-radius: 2px; background: rgba(255,255,255,.36); margin: 0 auto 5px; }
+  .dock-today { text-align: center; line-height: 1.1; }
+  .dock-today small { display: block; font-size: 6px; font-weight: 700; letter-spacing: .06em; color: rgba(255,255,255,.42); }
+  .dock-today b { display: block; margin-top: 3px; font-size: 9px; }
+  .dock-sep { width: 24px; height: 1px; margin: 6px auto; background: rgba(255,255,255,.13); }
+  .dock-rings { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .ring { position: relative; width: 25px; height: 25px; flex: none; }
+  .ring svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .ring img { position: absolute; width: 12px; height: 12px; left: 6.5px; top: 6.5px; border-radius: 3px; }
+  .dock-chevron { text-align: center; color: rgba(255,255,255,.55); font-size: 12px; margin-top: 4px; }
+  .s2-title { position: absolute; left: 100px; top: 150px; font-size: 124px; }
+  .s2-note { position: absolute; right: 110px; top: 205px; font-size: 24px; line-height: 1.4; color: var(--muted); text-align: right; }
+  .platform-grid { position: absolute; left: 100px; right: 100px; top: 390px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; }
+  .platform-card { position: relative; height: 455px; padding: 30px 26px; border-radius: 28px; border: 1px solid rgba(23,24,22,.13); background: rgba(255,255,255,.50); box-shadow: 0 16px 34px rgba(33,35,45,.05); overflow: hidden; }
+  .platform-card::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 7px; background: var(--brand); }
+  .platform-card img { width: 76px; height: 76px; border-radius: 18px; }
+  .platform-vendor { margin-top: 26px; font-size: 15px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .platform-name { margin-top: 5px; font-size: 30px; font-weight: 680; white-space: nowrap; letter-spacing: -.03em; }
+  .platform-percent { margin-top: 24px; font-size: 74px; font-weight: 740; letter-spacing: -.065em; }
+  .platform-percent small { font-size: 30px; }
+  .light-battery { margin-top: 19px; }
+  .light-battery .battery-label { color: #6c6d67; font-size: 14px; }
+  .light-battery .battery-label b { color: #252822; }
+  .light-battery .battery-track { height: 8px; background: rgba(20,22,18,.09); }
+  .light-battery .battery-fill { background: var(--brand); }
+  .platform-plan { margin-top: 20px; font-size: 14px; color: var(--muted); white-space: nowrap; }
+  .s3-title { position: absolute; left: 100px; top: 118px; font-size: 82px; }
+  .s3-hud { position: absolute; left: 100px; top: 255px; width: 644px; height: 670px; transform: scale(1.06); transform-origin: top left; }
+  .s3-right { position: absolute; left: 900px; right: 100px; top: 265px; display: grid; grid-template-columns: 1.15fr .85fr; gap: 22px; }
+  .bento-dark { border-radius: 28px; border: 1px solid rgba(255,255,255,.13); background: linear-gradient(145deg, rgba(255,255,255,.095), rgba(255,255,255,.035)); backdrop-filter: blur(24px); }
+  .comet-card { height: 410px; padding: 34px; }
+  .comet-card .big-ring { width: 190px; height: 190px; margin: 22px auto; }
+  .big-ring img { width: 72px; height: 72px; left: 59px; top: 59px; border-radius: 18px; }
+  .comet-card h3 { margin: 0; font-size: 25px; font-weight: 600; }
+  .comet-card p { color: rgba(255,255,255,.55); font-size: 18px; }
+  .speed-card { height: 410px; padding: 34px; }
+  .speed-card strong { display: block; margin-top: 60px; font-size: 68px; letter-spacing: -.055em; }
+  .speed-card small { font-size: 20px; color: rgba(255,255,255,.55); }
+  .speed-card .pill { margin-top: 35px; padding: 9px 14px; color: #9db5ff; background: rgba(82,101,237,.14); font-size: 16px; }
+  .mascot-card { grid-column: 1 / 3; height: 260px; padding: 28px 34px; display: flex; align-items: center; gap: 34px; }
+  .mascot-card img { width: 200px; height: 200px; object-fit: contain; }
+  .mascot-card h3 { margin: 0 0 12px; font-size: 34px; }
+  .mascot-card p { margin: 0; color: rgba(255,255,255,.55); font-size: 20px; line-height: 1.5; }
+  .s4-title { position: absolute; left: 100px; top: 195px; width: 750px; font-size: 138px; }
+  .s4-title span { display: block; }
+  .s4-sub { position: absolute; left: 108px; top: 520px; font-size: 31px; color: var(--muted); }
+  .atomic-steps { position: absolute; left: 108px; top: 630px; display: flex; gap: 14px; }
+  .atomic-step { width: 320px; padding: 23px; border-top: 2px solid #222; }
+  .atomic-step b { display: block; font-size: 17px; letter-spacing: .08em; }
+  .atomic-step span { display: block; margin-top: 10px; font-size: 21px; line-height: 1.35; }
+  .switch-preview { position: absolute; right: 100px; top: 228px; width: 830px; height: 560px; padding: 38px; border-radius: 34px; color: #fff; background: linear-gradient(145deg, #232b40, #101622); border: 1px solid rgba(255,255,255,.18); box-shadow: 0 32px 60px rgba(21,28,45,.25); }
+  .switch-preview-head { display: flex; align-items: center; gap: 15px; font-size: 28px; font-weight: 650; }
+  .switch-preview-head img { width: 48px; height: 48px; }
+  .account-preview { margin-top: 28px; padding: 24px; border-radius: 18px; background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.11); }
+  .account-preview.active { border-color: rgba(86,220,160,.4); }
+  .preview-row { display: flex; align-items: center; gap: 12px; }
+  .preview-email { font-size: 23px; font-weight: 600; }
+  .preview-badge { padding: 5px 10px; color: #73e5af; background: rgba(86,220,160,.12); font-size: 14px; }
+  .preview-plan { margin-top: 14px; color: rgba(255,255,255,.48); font-size: 17px; }
+  .switch-button { width: 170px; height: 52px; border: 1px solid rgba(255,255,255,.26); border-radius: 999px; color: #fff; background: rgba(255,255,255,.12); font-size: 17px; font-weight: 650; white-space: nowrap; }
+  .s5-title { position: absolute; left: 100px; top: 130px; font-size: 78px; }
+  .switch-stage { position: absolute; left: 190px; right: 190px; top: 290px; height: 560px; padding: 40px 46px; border-radius: 34px; background: linear-gradient(145deg, rgba(54,66,95,.88), rgba(19,26,40,.94)); border: 1px solid rgba(255,255,255,.18); box-shadow: 0 30px 80px rgba(0,0,0,.32); backdrop-filter: blur(30px); }
+  .switch-stage-head { display: flex; align-items: center; gap: 14px; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .switch-stage-head img { width: 46px; height: 46px; }
+  .switch-stage-head b { font-size: 27px; }
+  .switch-stage-head span { margin-left: auto; color: rgba(255,255,255,.48); font-size: 17px; }
+  .switch-row { position: relative; height: 155px; display: flex; align-items: center; gap: 16px; padding: 0 24px; margin-top: 20px; border-radius: 20px; background: rgba(0,0,0,.17); border: 1px solid rgba(255,255,255,.09); }
+  .switch-row.target { border-color: rgba(132,153,255,.35); }
+  .switch-row .status-dot { width: 10px; height: 10px; }
+  .switch-email { font-size: 25px; font-weight: 620; }
+  .switch-plan { color: rgba(255,255,255,.48); font-size: 16px; margin-top: 8px; }
+  .account-preview .switch-button, .switch-row .switch-button { margin-left: auto; }
+  .current-use { margin-left: auto; padding: 10px 15px; color: #75e5af; background: rgba(86,220,160,.12); font-size: 17px; }
+  #current-b { position: absolute; right: 49px; margin-left: 0; }
+  .switch-toast { position: absolute; left: 50%; bottom: 95px; transform: translateX(-50%); padding: 17px 26px; color: #9aefbf; background: rgba(30,72,55,.88); border: 1px solid rgba(113,229,173,.35); border-radius: 999px; font-size: 20px; white-space: nowrap; }
+  .cursor { position: absolute; left: 0; top: 0; width: 34px; height: 43px; z-index: 20; pointer-events: none; filter: drop-shadow(0 3px 4px rgba(0,0,0,.45)); transform-origin: 0 0; }
+  .click-pulse { position: absolute; width: 76px; height: 76px; border: 3px solid #a9b6ff; border-radius: 50%; pointer-events: none; z-index: 19; }
+  .s6-title { position: absolute; left: 100px; top: 150px; font-size: 112px; }
+  .reconcile-number { position: absolute; left: 100px; top: 388px; font-size: 160px; font-weight: 770; letter-spacing: -.065em; line-height: 1; }
+  .reconcile-number small { font-size: 31px; letter-spacing: 0; color: var(--muted); font-weight: 550; }
+  .reconcile-caption { position: absolute; left: 108px; top: 570px; color: var(--muted); font-size: 22px; }
+  .reconcile-equation { position: absolute; left: 100px; right: 100px; top: 690px; display: grid; grid-template-columns: 1fr 70px 1fr; gap: 18px; align-items: center; }
+  .reconcile-card { height: 175px; padding: 27px 30px; border-radius: 23px; border: 1px solid rgba(23,24,22,.14); background: rgba(255,255,255,.55); }
+  .reconcile-card.cloud { background: #e5e8ff; border-color: #c8cef8; }
+  .reconcile-card span { display: block; font-size: 18px; color: var(--muted); }
+  .reconcile-card b { display: block; margin-top: 12px; font-size: 45px; letter-spacing: -.04em; }
+  .equation-max { text-align: center; font-size: 20px; font-weight: 700; color: var(--blue); }
+  .s7-title { position: absolute; left: 100px; top: 120px; font-size: 80px; }
+  .billing-panel { position: absolute; left: 100px; top: 255px; width: 1110px; height: 690px; padding: 32px; border-radius: 30px; background: linear-gradient(145deg, rgba(50,62,89,.84), rgba(19,25,38,.94)); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(30px); }
+  .billing-head { display: flex; align-items: center; gap: 12px; }
+  .billing-head img { width: 40px; height: 40px; }
+  .billing-head b { font-size: 23px; }
+  .billing-head .pill { margin-left: auto; padding: 7px 12px; background: rgba(89,140,255,.13); color: #a7c2ff; font-size: 14px; }
+  .billing-summary { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; margin: 25px 0; }
+  .billing-metric { padding: 19px; border-radius: 16px; background: rgba(255,255,255,.055); }
+  .billing-metric span { display: block; color: rgba(255,255,255,.48); font-size: 14px; }
+  .billing-metric b { display: block; margin-top: 9px; font-size: 30px; }
+  .model-head, .model-row { display: grid; grid-template-columns: 1.25fr .6fr .8fr .55fr; gap: 12px; align-items: center; }
+  .model-head { padding: 0 16px 10px; color: rgba(255,255,255,.38); font-size: 13px; }
+  .model-row { height: 78px; padding: 0 16px; margin-top: 8px; border-radius: 13px; background: rgba(0,0,0,.16); border: 1px solid rgba(255,255,255,.07); font-size: 17px; }
+  .model-name { font-weight: 600; }
+  .origin { justify-self: start; padding: 4px 8px; border-radius: 99px; font-size: 12px; white-space: nowrap; }
+  .origin.cloud { color: #9fc1ff; background: rgba(84,139,255,.12); }
+  .origin.merged { color: #86e8b7; background: rgba(71,202,142,.12); }
+  .model-row .tokens { color: #bad0ff; }
+  .surface-panel { position: absolute; right: 100px; top: 255px; width: 590px; height: 690px; padding: 34px; border-radius: 30px; background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.12); }
+  .surface-panel h3 { margin: 0; font-size: 25px; }
+  .surface-panel > p { color: rgba(255,255,255,.45); font-size: 16px; }
+  .surface-total { margin: 35px 0; font-size: 65px; font-weight: 720; letter-spacing: -.05em; }
+  .surface-total small { display: block; margin-top: 8px; font-size: 16px; color: rgba(255,255,255,.43); letter-spacing: 0; }
+  .surface-row { margin-top: 24px; }
+  .surface-label { display: flex; justify-content: space-between; font-size: 17px; color: rgba(255,255,255,.68); }
+  .surface-label b { color: #fff; }
+  .surface-track { height: 10px; margin-top: 9px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: hidden; }
+  .surface-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #647cff, #63d9ba); }
+  .s8-title { position: absolute; left: 100px; top: 130px; font-size: 105px; }
+  .s8-sub { position: absolute; right: 105px; top: 195px; color: var(--muted); font-size: 23px; }
+  .monitor { position: absolute; top: 350px; width: 740px; height: 480px; padding: 13px; border-radius: 25px; background: #25272b; box-shadow: 0 25px 50px rgba(25,28,35,.18); }
+  .monitor.left { left: 110px; }
+  .monitor.right { right: 110px; }
+  .monitor-screen { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 14px; background: radial-gradient(circle at 30% 20%, #6474bb, transparent 48%), linear-gradient(135deg, #273248, #101621 65%, #1f4d52); }
+  .monitor-screen::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 30px; background: rgba(255,255,255,.09); backdrop-filter: blur(10px); }
+  .monitor-label { position: absolute; left: 26px; bottom: 24px; font-size: 14px; letter-spacing: .14em; color: rgba(255,255,255,.55); }
+  .monitor-stand { position: absolute; left: 50%; bottom: -90px; width: 170px; height: 90px; transform: translateX(-50%); background: linear-gradient(90deg, transparent, #34373c 28%, #34373c 72%, transparent); clip-path: polygon(38% 0, 62% 0, 70% 75%, 100% 88%, 100% 100%, 0 100%, 0 88%, 30% 75%); }
+  #magnetic-dock { position: absolute; left: 0; top: 0; z-index: 8; transform-origin: center; }
+  .snap-guide { position: absolute; top: 390px; bottom: 130px; width: 3px; background: var(--blue); opacity: 0; }
+  .snap-guide.left { left: 96px; }
+  .snap-guide.right { right: 96px; }
+  .magnetic-caption { position: absolute; left: 100px; right: 100px; bottom: 85px; display: flex; justify-content: center; gap: 14px; }
+  .magnetic-caption .pill { padding: 12px 20px; border: 1px solid rgba(23,24,22,.17); font-size: 19px; background: rgba(255,255,255,.4); }
+  .s9-title { position: absolute; left: 100px; top: 165px; font-size: 90px; }
+  .s9-48 { position: absolute; left: 94px; top: 380px; font-size: 245px; font-weight: 790; line-height: 1; letter-spacing: -.08em; color: #9eafff; }
+  .s9-48 small { font-size: 78px; letter-spacing: -.04em; }
+  .s9-note { position: absolute; left: 110px; top: 670px; width: 650px; color: rgba(255,255,255,.56); font-size: 24px; line-height: 1.5; }
+  .notification { position: absolute; right: 100px; top: 200px; width: 820px; min-height: 300px; padding: 30px; border-radius: 30px; background: linear-gradient(145deg, rgba(74,83,105,.82), rgba(35,41,55,.9)); border: 1px solid rgba(255,255,255,.23); box-shadow: 0 26px 60px rgba(0,0,0,.3); backdrop-filter: blur(36px) saturate(140%); }
+  .notification-app { display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,.55); font-size: 16px; }
+  .notification-app img { width: 34px; height: 34px; border-radius: 8px; }
+  .notification-app span:last-child { margin-left: auto; }
+  .notification h3 { margin: 25px 0 12px; font-size: 30px; }
+  .notification p { margin: 0; color: rgba(255,255,255,.72); font-size: 21px; line-height: 1.5; }
+  .notification-count { margin-top: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .notification-count b { font-size: 43px; color: #ffd38b; }
+  .notification-count span { color: rgba(255,255,255,.5); font-size: 16px; }
+  .privacy-card { position: absolute; right: 100px; top: 570px; width: 820px; height: 270px; padding: 34px; border-radius: 28px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.13); }
+  .privacy-label { color: rgba(255,255,255,.48); font-size: 16px; letter-spacing: .08em; }
+  .privacy-email { margin-top: 22px; font-size: 49px; font-weight: 680; letter-spacing: -.03em; }
+  .privacy-bottom { margin-top: 25px; display: flex; justify-content: space-between; align-items: center; color: rgba(255,255,255,.55); font-size: 18px; }
+  .privacy-bottom .pill { padding: 8px 13px; color: #8fe7b9; background: rgba(86,220,160,.10); }
+  .s10-title { position: absolute; left: 100px; top: 160px; font-size: 192px; }
+  .s10-subtitle { position: absolute; left: 106px; top: 390px; font-size: 86px; }
+  .s10-note { position: absolute; right: 110px; top: 220px; width: 470px; text-align: right; font-size: 25px; line-height: 1.5; color: var(--muted); }
+  .trust-grid { position: absolute; left: 100px; right: 100px; top: 620px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .trust-card { height: 250px; padding: 29px; border-radius: 25px; background: rgba(255,255,255,.52); border: 1px solid rgba(23,24,22,.14); }
+  .trust-icon { font-size: 34px; color: var(--blue); }
+  .trust-card h3 { margin: 26px 0 12px; font-size: 32px; }
+  .trust-card p { margin: 0; font-size: 20px; color: var(--muted); }
+  .s11-main { position: absolute; left: 100px; right: 100px; top: 150px; text-align: center; }
+  .s11-app { width: 142px; height: 142px; margin: 0 auto; border-radius: 34px; box-shadow: 0 20px 50px rgba(0,0,0,.35); }
+  .s11-brand { margin-top: 28px; font-size: 158px; }
+  .s11-tagline { margin-top: 24px; color: rgba(255,255,255,.67); font-size: 45px; letter-spacing: -.03em; }
+  .s11-providers { position: absolute; left: 50%; top: 700px; transform: translateX(-50%); display: flex; gap: 40px; }
+  .final-provider { width: 150px; text-align: center; color: rgba(255,255,255,.56); font-size: 16px; }
+  .final-provider img { width: 58px; height: 58px; border-radius: 14px; margin-bottom: 12px; }
+  .s11-bottom { position: absolute; left: 100px; right: 100px; bottom: 70px; display: flex; justify-content: center; gap: 12px; }
+  .s11-bottom .pill { padding: 11px 18px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.05); color: rgba(255,255,255,.65); font-size: 17px; }
+  .s11-mascot { position: absolute; right: 110px; bottom: 110px; width: 150px; height: 150px; object-fit: contain; }
+  #controls { position: fixed; z-index: 100; left: 50%; bottom: 18px; transform: translateX(-50%); width: 900px; height: 62px; display: flex; align-items: center; gap: 16px; padding: 0 20px; border-radius: 18px; background: rgba(20,22,28,.92); border: 1px solid rgba(255,255,255,.15); color: #fff; box-shadow: 0 12px 30px rgba(0,0,0,.3); }
+  #controls button { width: 72px; height: 36px; border: 0; border-radius: 10px; color: #fff; background: #5265ed; cursor: pointer; }
+  #scrub { flex: 1; accent-color: #8290ff; }
+  #timecode { width: 104px; text-align: right; font-size: 14px; }
+</style>
+</head>
+<body>
+<main id="stage" aria-label="TokenUse 产品介绍视频舞台">
+  <section class="scene light" id="scene-0">
+    <div class="topline"><span class="chapter"><b>01</b> TOKEN CLARITY</span><span>MACOS NATIVE</span></div>
+    <h1 class="display s0-title" data-r="0.08"><span>你的 AI 配额</span><span class="accent">不该靠猜</span></h1>
+    <div class="s0-sub" data-r="0.35"><span class="pill">5 大平台</span><span class="pill">多账号</span><span class="pill">官方对账</span></div>
+    <img class="icon s0-app" data-icon="appIcon" alt="TokenUse" data-r="0.22">
+    <div class="s0-side" data-r="0.52"><strong class="num">24 / 7</strong>贴边常驻<br>用量一眼看清</div>
+    <div class="foot-note">TOKENUSE / PRODUCT FILM</div><div class="footer-rule"></div><div class="giant-index">01</div>
+  </section>
+
+  <section class="scene dark desktop" id="scene-1">
+    <div class="wallpaper-orb orb-a"></div><div class="wallpaper-orb orb-b"></div>
+    <div class="topline"><span class="chapter"><b>02</b> MEET TOKENUSE</span><span>EDGE HUD</span></div>
+    <h1 class="display s1-title" data-r="0.05">TokenUse</h1>
+    <div class="s1-sub" data-r="0.18">屏幕边缘的毛玻璃 AI 用量仪表盘</div>
+    <div class="hero-hud" data-r="0.20"><div data-hud="hero"></div></div>
+    <div class="s1-dock" data-dock="hero" data-r="0.38"></div>
+    <div class="s1-copy" data-r="0.48"><span class="pill live-pill"><i class="live-dot"></i>会话运行中</span><h2 class="display">贴边<br>即见</h2><p>今日 Token 与五平台余量<br>无需打断当前工作</p></div>
+    <img class="icon s1-mascot" data-icon="mascot" alt="工作吉祥物" data-r="0.68">
+  </section>
+
+  <section class="scene light" id="scene-2">
+    <div class="topline"><span class="chapter"><b>03</b> FIVE PROVIDERS</span><span>ONE DASHBOARD</span></div>
+    <h1 class="display s2-title" data-r="0.05">五平台，同屏看清</h1>
+    <div class="s2-note" data-r="0.25">在线套餐配额 + 本地会话<br>电池式剩余量</div>
+    <div class="platform-grid">
+      <article class="platform-card" style="--brand:#5b8def" data-r="0.12"><img class="icon" data-icon="codex" alt="Codex"><div class="platform-vendor">OpenAI</div><div class="platform-name">Codex</div><div class="platform-percent num">82<small>%</small></div><div class="light-battery"><div class="battery-label"><span>5h 限额</span><b>剩余 82%</b></div><div class="battery-track"><div class="battery-fill" style="width:82%"></div></div></div><div class="light-battery"><div class="battery-label"><span>7d 周限额</span><b>剩余 68%</b></div><div class="battery-track"><div class="battery-fill" style="width:68%"></div></div></div><div class="platform-plan">多账号 · 一键切号</div></article>
+      <article class="platform-card" style="--brand:#ec78a7" data-r="0.20"><img class="icon" data-icon="antigravity" alt="Antigravity"><div class="platform-vendor">Google</div><div class="platform-name">Antigravity</div><div class="platform-percent num">74<small>%</small></div><div class="light-battery"><div class="battery-label"><span>Gemini 5h</span><b>剩余 74%</b></div><div class="battery-track"><div class="battery-fill" style="width:74%"></div></div></div><div class="light-battery"><div class="battery-label"><span>Gemini 7d</span><b>剩余 61%</b></div><div class="battery-track"><div class="battery-fill" style="width:61%"></div></div></div><div class="platform-plan">App / CLI / IDE</div></article>
+      <article class="platform-card" style="--brand:#ed9157" data-r="0.28"><img class="icon" data-icon="mimo" alt="MiMo"><div class="platform-vendor">Xiaomi</div><div class="platform-name">MiMo</div><div class="platform-percent num">91<small>%</small></div><div class="light-battery"><div class="battery-label"><span>月度套餐</span><b>剩余 91%</b></div><div class="battery-track"><div class="battery-fill" style="width:91%"></div></div></div><div class="light-battery"><div class="battery-label"><span>会员周限额</span><b>剩余 86%</b></div><div class="battery-track"><div class="battery-fill" style="width:86%"></div></div></div><div class="platform-plan">Token Plan</div></article>
+      <article class="platform-card" style="--brand:#9583f4" data-r="0.36"><img class="icon" data-icon="kimi" alt="Kimi"><div class="platform-vendor">Moonshot</div><div class="platform-name">Kimi</div><div class="platform-percent num">88<small>%</small></div><div class="light-battery"><div class="battery-label"><span>5h 窗口</span><b>剩余 88%</b></div><div class="battery-track"><div class="battery-fill" style="width:88%"></div></div></div><div class="light-battery"><div class="battery-label"><span>7d 周限额</span><b>剩余 79%</b></div><div class="battery-track"><div class="battery-fill" style="width:79%"></div></div></div><div class="platform-plan">Kimi Code</div></article>
+      <article class="platform-card" style="--brand:#5ccda5" data-r="0.44"><img class="icon" data-icon="minimax" alt="MiniMax"><div class="platform-vendor">MiniMax</div><div class="platform-name">MiniMax</div><div class="platform-percent num">67<small>%</small></div><div class="light-battery"><div class="battery-label"><span>Coding Plan</span><b>剩余 67%</b></div><div class="battery-track"><div class="battery-fill" style="width:67%"></div></div></div><div class="light-battery"><div class="battery-label"><span>全模型池</span><b>剩余 72%</b></div><div class="battery-track"><div class="battery-fill" style="width:72%"></div></div></div><div class="platform-plan">CN / Global</div></article>
+    </div>
+    <div class="foot-note">真实品牌资产 / 演示数据</div><div class="footer-rule"></div>
+  </section>
+
+  <section class="scene dark desktop" id="scene-3">
+    <div class="topline"><span class="chapter"><b>04</b> LIVE QUOTA</span><span>COMET ACTIVITY RING</span></div>
+    <h1 class="display s3-title" data-r="0.05">配额有电，生成有速</h1>
+    <div class="s3-hud" data-r="0.14"><div data-hud="live"></div></div>
+    <div class="s3-right">
+      <article class="bento-dark comet-card" data-r="0.24"><h3>彗星活跃环</h3><div class="ring big-ring" data-ring="codex" data-active="1"></div><p>本地 Session 正在生成<br>对应平台实时转动</p></article>
+      <article class="bento-dark speed-card" data-r="0.34"><small>实测生成速率</small><strong class="num" id="speed-value">86.4</strong><small>tok / s</small><br><span class="pill">输出 + 思考 Token</span></article>
+      <article class="bento-dark mascot-card" data-r="0.44"><img class="icon" data-icon="mascot" alt="工作吉祥物"><div><h3>工作搭子，也在状态里</h3><p>圆环、运行标签与实测速率同步呈现<br>空闲时静止，不额外消耗注意力</p></div></article>
+    </div>
+  </section>
+
+  <section class="scene light" id="scene-4">
+    <div class="topline"><span class="chapter"><b>05</b> CODEX SWITCH</span><span>ATOMIC ACCOUNT HANDOFF</span></div>
+    <h1 class="display s4-title" data-r="0.06"><span>换号</span><span class="accent">不必重来</span></h1>
+    <div class="s4-sub" data-r="0.24">Codex 多账号，一键切换系统当前登录态</div>
+    <div class="atomic-steps" data-r="0.36"><div class="atomic-step"><b>01 / 安全备份</b><span>自动保留原 auth.json</span></div><div class="atomic-step"><b>02 / 原子切换</b><span>新账号立即成为当前使用</span></div></div>
+    <div class="switch-preview" data-r="0.20"><div class="switch-preview-head"><img class="icon" data-icon="codex" alt=""><span>Codex</span><span class="pill preview-badge">2 个账号</span></div><div class="account-preview active"><div class="preview-row"><i class="status-dot"></i><span class="preview-email">ad*******om</span><span class="pill preview-badge">当前使用</span></div><div class="preview-plan">ChatGPT Plus · 7d 剩余 68%</div></div><div class="account-preview"><div class="preview-row"><i class="status-dot"></i><span class="preview-email">st*******com</span><button class="switch-button" id="codex-switch-intro" type="button">切换启用</button></div><div class="preview-plan">ChatGPT Team · 7d 剩余 91%</div></div></div>
+    <div class="foot-note">邮箱默认脱敏 / 原始账号名称不受影响</div><div class="footer-rule"></div>
+  </section>
+
+  <section class="scene dark desktop" id="scene-5">
+    <div class="topline"><span class="chapter"><b>06</b> ONE CLICK</span><span>SAFE BACKUP · ATOMIC WRITE</span></div>
+    <h1 class="display s5-title" data-r="0.05">一键，切到另一账号</h1>
+    <div class="switch-stage" data-r="0.12"><div class="switch-stage-head"><img class="icon" data-icon="codex" alt=""><b>Codex 账号</b><span>~/.codex/auth.json</span></div><div class="switch-row" id="switch-row-a"><i class="status-dot"></i><div><div class="switch-email">ad*******om</div><div class="switch-plan">ChatGPT Plus · 今日 428.6K Tokens</div></div><span class="pill current-use" id="current-a">当前使用</span></div><div class="switch-row target" id="switch-row-b"><i class="status-dot"></i><div><div class="switch-email">st*******com</div><div class="switch-plan">ChatGPT Team · 7d 剩余 91%</div></div><span class="pill current-use" id="current-b" style="opacity:0">当前使用</span><button class="switch-button" id="codex-switch" type="button">切换启用</button></div></div>
+    <div class="switch-toast" id="switch-toast" data-r="0.92">原子切换完成 · 原 auth.json 已安全备份</div>
+    <div class="click-pulse" id="switch-pulse"></div>
+    <svg class="cursor" id="cursor-switch" viewBox="0 0 34 43"><path d="M2 2 L2 33 L10 25 L16 40 L22 37 L16 23 L29 22 Z" fill="#fff" stroke="#111" stroke-width="2" stroke-linejoin="round"/></svg>
+  </section>
+
+  <section class="scene light" id="scene-6">
+    <div class="topline"><span class="chapter"><b>07</b> OFFICIAL RECONCILIATION</span><span>CLOUD + LOCAL</span></div>
+    <h1 class="display s6-title" data-r="0.05">跨端消耗，不再漏算</h1>
+    <div class="reconcile-number num" data-r="0.16"><span id="reconcile-total">0</span><small> Tokens / 今日</small></div>
+    <div class="reconcile-caption" data-r="0.32">即使消耗发生在其他电脑、Web 或 API，也能由官方计费接口捕获</div>
+    <div class="reconcile-equation" data-r="0.42"><div class="reconcile-card"><span>本机日志 / 今日</span><b class="num">842,160</b></div><div class="equation-max">MAX</div><div class="reconcile-card cloud"><span>官方云端 / 今日</span><b class="num">1,286,420</b></div></div>
+    <div class="foot-note">融合展示，不用本机日志覆盖云端消耗</div><div class="footer-rule"></div>
+  </section>
+
+  <section class="scene dark desktop" id="scene-7">
+    <div class="topline"><span class="chapter"><b>08</b> CROSS-DEVICE BILLING</span><span>PER-MODEL DETAIL</span></div>
+    <h1 class="display s7-title" data-r="0.05">官方 Token 消耗对账</h1>
+    <div class="billing-panel" data-r="0.12"><div class="billing-head"><img class="icon" data-icon="codex" alt=""><b>Wham 官方多端</b><span class="pill">官方云端 + 本机日志</span></div><div class="billing-summary"><div class="billing-metric"><span>今日融合 Token</span><b class="num">1,286,420</b></div><div class="billing-metric"><span>近 30 天</span><b class="num">18.42M</b></div><div class="billing-metric"><span>周期 Credits</span><b class="num">1.6K cr</b></div></div><div class="model-head"><span>分模型</span><span>来源</span><span>官方云端</span><span>本机日志</span></div><div class="model-row"><span class="model-name">GPT-5 Codex</span><span class="origin merged">云端+本机</span><span class="tokens num">今日 886.2K</span><span class="num">512.8K</span></div><div class="model-row"><span class="model-name">GPT-5</span><span class="origin cloud">官方云端</span><span class="tokens num">30d 6.84M</span><span class="num">—</span></div><div class="model-row"><span class="model-name">Code Review</span><span class="origin merged">云端+本机</span><span class="tokens num">30d 3.12M</span><span class="num">1.08M</span></div><div class="model-row"><span class="model-name">其他模型</span><span class="origin cloud">官方云端</span><span class="tokens num">30d 2.26M</span><span class="num">—</span></div></div>
+    <aside class="surface-panel" data-r="0.28"><h3>跨端来源分布</h3><p>Desktop / CLI / Web / VS Code / Code Review</p><div class="surface-total num">18.42M<small>近 30 天官方 Tokens</small></div><div class="surface-row"><div class="surface-label"><span>CLI</span><b class="num">46%</b></div><div class="surface-track"><div class="surface-fill" style="width:46%"></div></div></div><div class="surface-row"><div class="surface-label"><span>Desktop</span><b class="num">27%</b></div><div class="surface-track"><div class="surface-fill" style="width:27%"></div></div></div><div class="surface-row"><div class="surface-label"><span>Web</span><b class="num">15%</b></div><div class="surface-track"><div class="surface-fill" style="width:15%"></div></div></div><div class="surface-row"><div class="surface-label"><span>VS Code + Review</span><b class="num">12%</b></div><div class="surface-track"><div class="surface-fill" style="width:12%"></div></div></div></aside>
+  </section>
+
+  <section class="scene light" id="scene-8">
+    <div class="topline"><span class="chapter"><b>09</b> MAGNETIC EDGE DOCK</span><span>MULTI-DISPLAY MEMORY</span></div>
+    <h1 class="display s8-title" data-r="0.05">跨屏磁吸，随你停靠</h1><div class="s8-sub" data-r="0.20">避开其他边缘工具，位置由你决定</div>
+    <div class="monitor left" data-r="0.14"><div class="monitor-screen"><span class="monitor-label">DISPLAY 01</span></div><div class="monitor-stand"></div></div><div class="monitor right" data-r="0.20"><div class="monitor-screen"><span class="monitor-label">DISPLAY 02</span></div><div class="monitor-stand"></div></div>
+    <div class="snap-guide left" id="snap-left"></div><div class="snap-guide right" id="snap-right"></div>
+    <div id="magnetic-dock" data-dock="magnetic"></div>
+    <svg class="cursor" id="cursor-magnetic" viewBox="0 0 34 43"><path d="M2 2 L2 33 L10 25 L16 40 L22 37 L16 23 L29 22 Z" fill="#fff" stroke="#111" stroke-width="2" stroke-linejoin="round"/></svg>
+    <div class="magnetic-caption" data-r="0.42"><span class="pill">左右贴边</span><span class="pill">上下自由</span><span class="pill">96px 磁吸</span><span class="pill">多屏位置记忆</span></div>
+  </section>
+
+  <section class="scene dark desktop" id="scene-9">
+    <div class="topline"><span class="chapter"><b>10</b> PRIVATE BY DEFAULT</span><span>48H RESET NOTICE</span></div>
+    <h1 class="display s9-title" data-r="0.05">重要到期，提前告诉你</h1><div class="s9-48 num" data-r="0.16">48<small>h</small></div><div class="s9-note" data-r="0.30">ChatGPT 重置券逐张倒计时<br>不足完整 48 小时，自动发送 macOS 原生通知</div>
+    <div class="notification" data-r="0.22"><div class="notification-app"><img class="icon" data-icon="appIcon" alt=""><span>TOKENUSE</span><span>现在</span></div><h3>ChatGPT 重置券即将到期</h3><p>ad*******om · 当前用量 68%<br>你有 1 张重置券将在 48 小时内过期</p><div class="notification-count"><b class="num" id="reset-countdown">23:41:36</b><span>剩余时间</span></div></div>
+    <div class="privacy-card" data-r="0.40"><div class="privacy-label">展示层隐私打码</div><div class="privacy-email num">ad*******om</div><div class="privacy-bottom"><span>截屏与投屏，不泄露完整邮箱</span><span class="pill">默认开启</span></div></div>
+  </section>
+
+  <section class="scene light" id="scene-10">
+    <div class="topline"><span class="chapter"><b>11</b> NATIVE & PRIVATE</span><span>ZERO TELEMETRY</span></div>
+    <h1 class="display s10-title" data-r="0.05">Swift 6</h1><h2 class="display s10-subtitle" data-r="0.18">本地只读，<span class="accent">零遥测</span></h2><div class="s10-note" data-r="0.28">不挂代理，不注入 CLI<br>只直连各平台官方 API<br>没有第三方中转服务</div>
+    <div class="trust-grid"><article class="trust-card" data-r="0.24"><div class="trust-icon">↯</div><h3>零侵入扫描</h3><p>只读本地 JSONL / SQLite / Protobuf</p></article><article class="trust-card" data-r="0.34"><div class="trust-icon">⌘</div><h3>原生 macOS</h3><p>Apple Silicon · macOS 14+</p></article><article class="trust-card" data-r="0.44"><div class="trust-icon">◇</div><h3>Keychain 存证</h3><p>API Key 与 OAuth 凭证留在本机</p></article></div>
+    <div class="foot-note">NO PROXY / NO HOOK / NO THIRD-PARTY TELEMETRY</div><div class="footer-rule"></div>
+  </section>
+
+  <section class="scene dark desktop" id="scene-11">
+    <div class="topline"><span class="chapter"><b>12</b> TOKENUSE</span><span>OPEN SOURCE · MIT</span></div>
+    <div class="s11-main"><img class="icon s11-app" data-icon="appIcon" alt="TokenUse" data-r="0.05"><h1 class="display s11-brand" data-r="0.16">TokenUse</h1><div class="s11-tagline" data-r="0.30">让每一个 Token 都有数</div></div>
+    <div class="s11-providers" data-r="0.42"><div class="final-provider"><img class="icon" data-icon="codex" alt="Codex"><div>Codex</div></div><div class="final-provider"><img class="icon" data-icon="antigravity" alt="Antigravity"><div>Antigravity</div></div><div class="final-provider"><img class="icon" data-icon="mimo" alt="MiMo"><div>MiMo</div></div><div class="final-provider"><img class="icon" data-icon="kimi" alt="Kimi"><div>Kimi</div></div><div class="final-provider"><img class="icon" data-icon="minimax" alt="MiniMax"><div>MiniMax</div></div></div>
+    <div class="s11-bottom" data-r="0.58"><span class="pill">MIT 开源</span><span class="pill">Swift 6 · 零遥测</span><span class="pill">macOS 14+</span><span class="pill">github.com/zhangsubo/token-use</span></div>
+    <img class="icon s11-mascot" data-icon="mascot" alt="工作吉祥物" data-r="0.66">
+  </section>
+</main>
+<div id="controls"><button id="play" type="button">播放</button><input id="scrub" type="range" min="0" max="24" step="0.0166666667" value="0" aria-label="视频进度"><span id="timecode" class="num">00.00 / 24.00</span></div>
+<script src="assets.js"></script>
+<script src="engine.js"></script>
+<script>
+(() => {
+  const E = window.Engine;
+  const A = window.ASSETS;
+  const providers = ['codex', 'antigravity', 'mimo', 'kimi', 'minimax'];
+  const scenes = Array.from({ length: 12 }, (_, i) => document.getElementById(`scene-${i}`));
+  const rendering = new URLSearchParams(location.search).get('render') === '1';
+  let ringSequence = 0;
+
+  function ringMarkup(provider, active) {
+    const remaining = { codex: 82, antigravity: 74, mimo: 91, kimi: 88, minimax: 67 }[provider];
+    const color = remaining < 70 ? '#f2bd60' : '#59dca2';
+    const id = `ring-${ringSequence++}`;
+    return `<div class="ring" data-ring-provider="${provider}" ${active ? 'data-comet="1"' : ''}><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="43" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="8"/><circle cx="50" cy="50" r="43" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round" pathLength="100" stroke-dasharray="${remaining} 100" transform="rotate(-90 50 50)"/>${active ? `<g class="comet-arc" id="${id}"><circle cx="50" cy="50" r="43" fill="none" stroke="#f8ffff" stroke-width="10" stroke-linecap="round" pathLength="100" stroke-dasharray="18 82"/></g>` : ''}</svg><img class="icon" data-icon="${provider}" alt="${provider}"></div>`;
+  }
+
+  function dockMarkup() {
+    return `<div class="edge-dock"><div class="dock-grip"></div><div class="dock-today"><small>TODAY</small><b class="num">1.28M</b></div><div class="dock-sep"></div><div class="dock-rings">${providers.map((p, i) => ringMarkup(p, i === 0 || i === 3)).join('')}</div><div class="dock-chevron">‹</div></div>`;
+  }
+
+  function battery(label, remaining, width) {
+    return `<div><div class="battery-label"><span>${label}</span><b class="num">剩余 ${remaining}%</b></div><div class="battery-track"><div class="battery-fill" style="width:${width}%"></div></div></div>`;
+  }
+
+  function hudMarkup() {
+    return `<div class="hud-window"><div class="hud-inner"><div class="hud-header"><div class="hud-bolt">ϟ</div><div><div class="hud-brand">TokenUse</div><div class="hud-subtitle">5 大平台 · 8 个已启用账号</div></div><div class="hud-actions"><span class="hud-action">⌘</span><span class="hud-action">＋</span><span class="hud-action">↻</span><span class="hud-action">⚙</span></div></div><div class="hud-divider"></div><div class="hud-summary"><div class="metric"><div class="metric-title">今日消耗 (Today)</div><div class="metric-value num">1,286,420 <small>Tokens</small></div></div><div class="metric"><div class="metric-title">近 90 天累计 (90d)</div><div class="metric-value num">38.94M <small>Tokens</small></div></div><img class="hud-mascot" data-icon="mascot" alt=""></div><div class="filters"><span class="filter selected">▦ 全部 8</span>${providers.map((p, i) => `<span class="filter"><img data-icon="${p}" alt="">${['Codex','Antigravity','MiMo','Kimi','MiniMax'][i]}</span>`).join('')}</div><section class="provider-card"><div class="provider-head"><img class="provider-logo" data-icon="codex" alt=""><span class="provider-name">Codex</span><span class="vendor">OpenAI</span><span class="pill running">● 运行中</span></div><div class="account"><div class="account-line"><i class="status-dot"></i><span class="account-name">ad*******om</span><span class="account-badge">当前使用</span><span class="account-tokens num">⚡ 86.4 tok/s</span></div><div class="battery-grid">${battery('5h 限额', 82, 82)}${battery('7d 周限额', 68, 68)}</div><div class="cloud-strip"><b>☁ Wham 官方多端</b><span class="num">今日 428.6K · CLI 56%</span><span>3 个模型</span></div></div></section><section class="provider-card"><div class="provider-head"><img class="provider-logo" data-icon="kimi" alt=""><span class="provider-name">Kimi Code</span><span class="vendor">Moonshot</span><span class="today-mini num">今日 318.2K</span></div><div class="account"><div class="account-line"><i class="status-dot"></i><span class="account-name">wo*******com</span><span class="account-badge">Coding Plan</span><span class="account-tokens num">⚡ 72.8 tok/s</span></div><div class="battery-grid">${battery('5h 并发窗口', 88, 88)}${battery('7d 周限额', 79, 79)}</div><div class="cloud-strip"><b>☁ Kimi 官方配额</b><span class="num">月池共享 · Coding 池</span><span>明细</span></div></div></section><div class="hud-footer"><span class="num">2026-11-07 14:32:08</span><span>本地日志 + 在线配额 · 演示数据</span></div></div></div>`;
+  }
+
+  document.querySelectorAll('[data-dock]').forEach((el) => { el.innerHTML = dockMarkup(); });
+  document.querySelectorAll('[data-hud]').forEach((el) => { el.innerHTML = hudMarkup(); });
+  document.querySelectorAll('.big-ring[data-ring]').forEach((el) => {
+    el.outerHTML = ringMarkup(el.dataset.ring, true).replace('class="ring"', 'class="ring big-ring"');
+  });
+  document.querySelectorAll('img[data-icon]').forEach((img) => {
+    img.src = A[img.dataset.icon];
+    img.draggable = false;
+  });
+
+  const ready = document.fonts.ready.then(() => Promise.all(
+    Array.from(document.images).map((img) => img.decode().catch(() => {})),
+  ));
+  const baseTransforms = new Map();
+  document.querySelectorAll('[data-r]').forEach((el) => {
+    const transform = getComputedStyle(el).transform;
+    baseTransforms.set(el, transform === 'none' ? '' : transform);
+  });
+
+  function reveal(scene, local) {
+    scene.querySelectorAll('[data-r]').forEach((el) => {
+      const p = E.spring(local, Number(el.dataset.r), 18, 0.85);
+      el.style.opacity = E.clamp(p * 1.7);
+      el.style.transform = `${baseTransforms.get(el)} translateY(${(1 - p) * 46}px)`;
+    });
+  }
+
+  function positionCursor(id, point, scale = 1) {
+    const cursor = document.getElementById(id);
+    cursor.style.transform = `translate(${point.x}px, ${point.y}px) scale(${scale})`;
+  }
+
+  function formatInt(value) {
+    return Math.round(value).toLocaleString('en-US');
+  }
+
+  window.seek = async (time) => {
+    await ready;
+    const t = E.clamp(Number.isFinite(Number(time)) ? Number(time) : 0, 0, 24 - 0.0002);
+    const index = Math.min(11, Math.floor(t / 2));
+    const local = t - index * 2;
+    scenes.forEach((scene, i) => { scene.style.display = i === index ? 'block' : 'none'; });
+    const scene = scenes[index];
+    reveal(scene, local);
+
+    document.querySelectorAll('.comet-arc').forEach((arc) => {
+      arc.setAttribute('transform', `rotate(${((t * 313.043478) % 360) - 90} 50 50)`);
+    });
+
+    if (index === 3) {
+      document.getElementById('speed-value').textContent = (72.8 + 13.6 * E.spring(local, 0.30, 12, 0.85)).toFixed(1);
+    }
+
+    if (index === 5) {
+      const target = E.centerOf('codex-switch');
+      const travel = E.spring(local, 0.12, 10, 0.85);
+      const start = { x: 1420, y: 875 };
+      const point = { x: start.x + (target.x - start.x) * travel, y: start.y + (target.y - start.y) * travel };
+      const click = Math.max(0, 1 - Math.abs(local - 0.75) / 0.11);
+      positionCursor('cursor-switch', point, 1 - click * 0.16);
+      const pulse = document.getElementById('switch-pulse');
+      pulse.style.left = `${target.x - 38}px`;
+      pulse.style.top = `${target.y - 38}px`;
+      pulse.style.opacity = click;
+      pulse.style.transform = `scale(${0.45 + (1 - click) * 0.75})`;
+      const switched = local >= 0.75;
+      const button = document.getElementById('codex-switch');
+      button.style.opacity = switched ? 0 : 1;
+      button.style.background = switched ? 'rgba(86,220,160,.22)' : 'rgba(255,255,255,.12)';
+      document.getElementById('current-a').style.opacity = switched ? 0 : 1;
+      document.getElementById('current-b').style.opacity = switched ? 1 : 0;
+      document.getElementById('switch-row-b').style.borderColor = switched ? 'rgba(86,220,160,.52)' : 'rgba(132,153,255,.35)';
+    }
+
+    if (index === 6) {
+      const count = E.clamp(E.spring(local, 0.22, 12, 0.85));
+      document.getElementById('reconcile-total').textContent = formatInt(1286420 * count);
+    }
+
+    if (index === 8) {
+      const dock = document.getElementById('magnetic-dock');
+      const move = E.spring(local, 0.22, 8, 0.85);
+      const x = 1732 + (120 - 1732) * move;
+      const y = 444 + (490 - 444) * move - Math.sin(move * Math.PI) * 75;
+      dock.style.transform = `translate(${x}px, ${y}px) scale(1.22)`;
+      const center = E.centerOf('magnetic-dock');
+      positionCursor('cursor-magnetic', center, 1.15);
+      const snapped = E.clamp((local - 1.12) * 4);
+      document.getElementById('snap-left').style.opacity = snapped * 0.75;
+      document.getElementById('snap-right').style.opacity = (1 - E.clamp(local * 2)) * 0.45;
+    }
+
+    if (index === 9) {
+      const seconds = Math.max(0, Math.floor(23 * 3600 + 41 * 60 + 36 - local));
+      const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor(seconds % 3600 / 60)).padStart(2, '0');
+      const s = String(seconds % 60).padStart(2, '0');
+      document.getElementById('reset-countdown').textContent = `${h}:${m}:${s}`;
+    }
+
+    document.getElementById('scrub').value = t;
+    document.getElementById('timecode').textContent = `${t.toFixed(2).padStart(5, '0')} / 24.00`;
+  };
+
+  document.getElementById('controls').style.display = rendering ? 'none' : 'flex';
+  if (!rendering) {
+    const play = document.getElementById('play');
+    const scrub = document.getElementById('scrub');
+    let playing = false;
+    let origin = 0;
+    let from = 0;
+    const frame = (now) => {
+      if (!playing) return;
+      const t = from + (now - origin) / 1000;
+      if (t >= 24) {
+        playing = false;
+        play.textContent = '播放';
+        window.seek(23.9998);
+        return;
+      }
+      window.seek(t);
+      requestAnimationFrame(frame);
+    };
+    play.addEventListener('click', () => {
+      playing = !playing;
+      play.textContent = playing ? '暂停' : '播放';
+      if (playing) {
+        from = Number(scrub.value) >= 24 ? 0 : Number(scrub.value);
+        origin = performance.now();
+        requestAnimationFrame(frame);
+      }
+    });
+    scrub.addEventListener('input', () => {
+      from = Number(scrub.value);
+      origin = performance.now();
+      window.seek(from);
+    });
+  }
+  window.seek(0);
+})();
+</script>
+</body>
+</html>

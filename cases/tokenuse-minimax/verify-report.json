@@ -1,0 +1,25 @@
+{
+  "file": "tokenuse-minimax-promo.mp4",
+  "sizeBytes": 8177050,
+  "durationSeconds": 44.033333,
+  "video": {
+    "codec": "h264",
+    "profile": "High",
+    "pixFmt": "yuv420p",
+    "colorRange": "tv",
+    "colorSpace": "bt470bg",
+    "width": 1920,
+    "height": 1080,
+    "nbFrames": "2642",
+    "avgFrameRate": "60/1",
+    "bitrate": "1224305"
+  },
+  "audio": {
+    "codec": "aac",
+    "sampleRate": "48000",
+    "channels": 2,
+    "bitrate": "248165"
+  },
+  "integratedLufs": -14.6,
+  "truePeakDbfs": -2.5
+}

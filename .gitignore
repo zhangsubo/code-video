@@ -1,0 +1,31 @@
+# OS & Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Rendered Media & Audio Artifacts (reproducible locally via scripts)
+*.mp4
+*.mov
+*.mkv
+*.wav
+*.mp3
+*.aac
+*.flac
+videos/
+
+# Temporary Render & Browser Profiles
+.tmp/
+.chrome*/
+tmp/
+
+# Node & Python
+node_modules/
+__pycache__/
+*.py[cod]
+.venv/
+
+# Secrets & Local Overrides
+.env
+.env.*
+*.local.json
