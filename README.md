@@ -39,6 +39,11 @@
 │   ├── kimi-video-director.md
 │   ├── minimax-video-playbook.md
 │   └── minimax-video-director.md
+├── skills/                                    # 标准 Agent Skills 技能包矩阵（兼容 Claude Code / OpenClaw / 小红书 RED Skill）
+│   ├── code-video-director/                   # [总控主 Skill] 三档模型自动路由 + 7 条铁律 + 零依赖通用渲染与音频模板
+│   ├── code-video-gemini/                     # [子 Skill 01] Gemini 极速实机流（百万上下文啃源码 + 原生看片终审）
+│   ├── code-video-kimi/                       # [子 Skill 02] Kimi 瑞士海报风（暖白↔曜石硬切 + 声波网格图视觉审音频）
+│   └── code-video-minimax/                    # [子 Skill 03] MiniMax 三模态大片（人声毫秒主时钟 + 光学底板 + 包络闪避混音）
 └── cases/                                     # 三套完整可预览、可重渲的实战源码工程（npm install = 0）
     ├── tokenuse-gemini/                       # 01: 单文件纯函数舞台 + 12 帧探针图谱
     ├── tokenuse-kimi/                         # 02: 四模块解耦引擎 + 声波网格图 + 11 切点零残影拼图
@@ -71,10 +76,15 @@ python3 audio_mix.py       # 生成 -7.5dB 包络闪避混音母带 (audio.wav)
 node render.mjs --full     # 合成最终 44.03s 有声产品大片
 ```
 
-### 3. 为你自己的新项目拍一支代码视频（3 步复用 `prompts/`）
-- **追求 20 分钟极速出片（无旁白）**：复制 [prompts/gemini-video-playbook.md](prompts/gemini-video-playbook.md) 或参考 [docs/01-gemini-scheme.md](docs/01-gemini-scheme.md) 中的触发提示词交给 Gemini。
-- **追求高对比度瑞士杂志感大字报（无旁白）**：使用 `kimi --yolo --agent-file prompts/kimi-video-director.md` 配合 [prompts/kimi-video-playbook.md](prompts/kimi-video-playbook.md)。
-- **追求发布会级真人配音 + 摄影底板商业大片**：使用 `mcode exec --permission full --model minimax/MiniMax-M3 --append-system-prompt-file prompts/minimax-video-director.md` 配合 [prompts/minimax-video-playbook.md](prompts/minimax-video-playbook.md)。
+### 3. 为你自己的新项目拍一支代码视频（一键安装 Skill 或复制 `prompts/`）
+- **Agent Skill 一键安装（推荐，支持 Claude Code / OpenClaw / Cursor / Antigravity 及小红书 RED Skill）**：
+  ```bash
+  # 安装总控主 Skill（自动按环境路由）或按需选择指定模型子 Skill
+  npx -y skills add zhangsubo/code-video --skill code-video-director
+  ```
+- **追求 20 分钟极速出片（无旁白）**：加载 `skills/code-video-gemini` 或复制 [prompts/gemini-video-playbook.md](prompts/gemini-video-playbook.md) 交给 Gemini。
+- **追求高对比度瑞士杂志感大字报（无旁白）**：加载 `skills/code-video-kimi` 或使用 `kimi --yolo --agent-file prompts/kimi-video-director.md` 配合 [prompts/kimi-video-playbook.md](prompts/kimi-video-playbook.md)。
+- **追求发布会级真人配音 + 摄影底板商业大片**：加载 `skills/code-video-minimax` 或使用 `mcode exec --permission full --model minimax/MiniMax-M3 --append-system-prompt-file prompts/minimax-video-director.md` 配合 [prompts/minimax-video-playbook.md](prompts/minimax-video-playbook.md)。
 
 ---
 
