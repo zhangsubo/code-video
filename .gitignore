@@ -29,3 +29,6 @@ __pycache__/
 .env
 .env.*
 *.local.json
+
+# Keep repo-level AI Studio spec tracked even if globally ignored
+!AGENTS.md
